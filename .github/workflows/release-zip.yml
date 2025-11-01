@@ -1,0 +1,89 @@
+name: Create distributable zip (tag or manual)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for the release (optional). If empty, workflow uses current ref name.'
+        required: false
+        default: ''
+
+jobs:
+  make-release-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine tag and zip name
+        id: meta
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              TAG="${GITHUB_REF#refs/tags/}"
+            else
+              TAG="${GITHUB_REF#refs/heads/}"
+              if [ -z "$TAG" ]; then
+                TAG="$(git rev-parse --short HEAD)"
+              fi
+            fi
+          fi
+          ZIPNAME="my-package-${TAG}.zip"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "zipname=${ZIPNAME}" >> $GITHUB_OUTPUT
+          echo "Using tag=$TAG and zipname=$ZIPNAME"
+
+      - name: Create distributable zip (exclude .md and examples/)
+        run: |
+          ZIP="${{ steps.meta.outputs.zipname }}"
+          rm -f "$ZIP"
+          zip -r "$ZIP" install_windows.bat themes -x '*.md' '*/examples/*' 'themes/**/examples/*' 'themes/**/*.md'
+          echo "Created $ZIP with contents:"
+          unzip -l "$ZIP"
+
+      - name: Create SHA256 checksum
+        run: |
+          ZIP="${{ steps.meta.outputs.zipname }}"
+          sha256sum "$ZIP" > "${ZIP}.sha256"
+          cat "${ZIP}.sha256"
+
+      - name: Create GitHub Release (if tag looks like vX.Y.Z)
+        id: create_release
+        if: startsWith( steps.meta.outputs.tag, 'v' )
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.tag }}
+          body: "Automated release for ${{ steps.meta.outputs.tag }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload zip asset to release (only if release was created)
+        if: steps.create_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.meta.outputs.zipname }}
+          asset_name: ${{ steps.meta.outputs.zipname }}
+          asset_content_type: application/zip
+
+      - name: Upload sha256 asset to release (only if release was created)
+        if: steps.create_release.outputs.upload_url != ''
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.meta.outputs.zipname }}.sha256
+          asset_name: ${{ steps.meta.outputs.zipname }}.sha256
+          asset_content_type: text/plain
+
+      - name: Final log - location of generated files
+        run: |
+          ls -l
+          echo "Artifact(s): ${{ steps.meta.outputs.zipname }} and ${{ steps.meta.outputs.zipname }}.sha256 (if created)"
