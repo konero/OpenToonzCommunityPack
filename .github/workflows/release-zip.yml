@@ -38,7 +38,7 @@ jobs:
               fi
             fi
           fi
-          ZIPNAME="my-package-${TAG}.zip"
+          ZIPNAME="OT-Community-Pack-${TAG}.zip"
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "zipname=${ZIPNAME}" >> $GITHUB_OUTPUT
           echo "Using tag=$TAG and zipname=$ZIPNAME"
