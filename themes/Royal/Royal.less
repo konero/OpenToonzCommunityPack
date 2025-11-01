@@ -1,0 +1,172 @@
+// out: "Royal.qss"
+
+//! The above line is for Easy LESS (VSCode extension) output location
+
+// -----------------------------------------------------------------------------
+// ROYAL THEME
+// -----------------------------------------------------------------------------
+// Recomended User Changes:
+// :: Font: Merriweather
+// :: Viewer BG Color: 28, 28, 34
+// :: Preview BG Color: 18, 18, 24
+// -----------------------------------------------------------------------------
+
+// Name of this theme
+@theme-name: 'Royal';
+
+// The theme we override the variables of:
+@import '../Default/less/themes/default/default-theme.less';
+
+// Image path relative to where this *.qss theme is output
+@img-url: '../Default/imgs/white';
+
+// Community assets image path
+// These are installed to: qss/Default/imgs/*
+// Is equal to: @img-url + @community-img-url
+@community-img-url: 'CommunityPack/@{theme-name}';
+
+// COLORS ----------------------------------------------------------------------
+
+@bg-color: #343641;
+
+@text-color: #d5d3d2;
+
+@hl-color: hsla(260, 13%, 5%, 0.8);
+@hl-text-color: @normal-label-color;
+
+@normal-label-color: #efc8a6;
+@fx-settings-label-color: @normal-label-color;
+
+@icon-base-opacity: 0.9;
+@icon-base-color: rgb(216, 194, 156);
+@icon-active-color: #ffc676;
+
+@royal-hover-color: mix(@normal-label-color, @bg-color, 20);
+@dark-radial-grad: e('qradialgradient(cx:0.5, cy:0.5, radius:0.6, fx:0.5, fy:0.5, stop:0 @{hl-color}, stop:1 transparent)');
+
+// -----------------------------------------------------------------------------
+// Tabs
+// -----------------------------------------------------------------------------
+
+// Selected
+@tab-text-color-selected: @normal-label-color;
+
+// Hover
+@tab-text-color-hover: @normal-label-color;
+
+// -----------------------------------------------------------------------------
+// Button
+// -----------------------------------------------------------------------------
+
+@button-border-color-focus: @normal-label-color;
+
+// Focus Hover
+@button-bg-color-focus-hover: @royal-hover-color;
+@button-border-color-focus-hover: @button-border-color-focus;
+
+// -----------------------------------------------------------------------------
+// Tool Buttons
+// -----------------------------------------------------------------------------
+
+// Checked Hover
+@toolbutton-bg-color-checked-hover: @royal-hover-color;
+
+// -----------------------------------------------------------------------------
+// ComboBox
+// -----------------------------------------------------------------------------
+@combobox-border-color-focus: rgb(190, 136, 60);
+
+// -----------------------------------------------------------------------------
+// Textfield
+// -----------------------------------------------------------------------------
+
+@input-text-color: @normal-label-color;
+@input-text-color-focus: @input-text-color;
+@input-border-color-focus: @normal-label-color;
+
+// Text Selection
+@input-selection-text-color: black;
+@input-selection-bg-color: fade(@normal-label-color, 80%);
+
+// -----------------------------------------------------------------------------
+// CheckBox
+// -----------------------------------------------------------------------------
+
+@checkbox-text-color-hover: @normal-label-color;
+
+// Checked
+@checkbox-img-checked: '@{community-img-url}/checkmark-@{theme-name}.svg';
+@checkbox-img-disabled: '@{community-img-url}/checkmark_disabled-@{theme-name}.svg';
+@checkbox-img-partially: '@{community-img-url}/checkpartially-@{theme-name}.svg';
+@checkbox-img-partially-disabled: '@{community-img-url}/checkpartially_disabled-@{theme-name}.svg';
+
+// -----------------------------------------------------------------------------
+// Titlebars
+// -----------------------------------------------------------------------------
+
+@titlebar-text-color-active: @normal-label-color;
+
+// -----------------------------------------------------------------------------
+// Viewer
+// -----------------------------------------------------------------------------
+
+@flipmarker-img: '@{community-img-url}/flipmarker-@{theme-name}.svg';
+
+// [xsh] =======================================================================
+
+// SETTINGS --------------------------------------------------------------------
+
+@xsh-border-contrast: 1.35; // multiplier
+
+// Cell
+@xsh-cell-lighten-amount: -4%;
+@xsh-cell-sat-amount: -4%;
+
+@xsh-border-darken-amount: 15%;
+
+@xsh-hl-mix-color: hsl(hue(@normal-label-color), 50%, 50%);
+@xsh-hl-mix-amount: 84%;
+
+@xsh-current-cell-border-color: @normal-label-color;
+
+// Framenumber Area
+@xsh-framenumber-current-text-color: rgb(255, 255, 255);
+@xsh-framenumber-current-bg-color: rgb(160, 74, 74);
+
+// [node] ======================================================================
+
+// Keyframes
+@keyframe-total-color: #7b582e;
+
+// Wireframe Modification
+/* -----------------------------------------------------------------------------
+   Rooms Workspaces
+----------------------------------------------------------------------------- */
+
+#TopBarTab {
+  &::tab {
+    @border-gradient-color: e('qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 transparent, stop:0.5 @{border-color}, stop:1 transparent)');
+    background-color: transparent;
+    border-color: @border-gradient-color;
+    border-radius: 0;
+    border-top-width: 0;
+
+    &:hover { background-color: @dark-radial-grad; }
+
+    &:selected {
+      background-color: @dark-radial-grad;
+      border-color: @border-gradient-color;
+
+      &:hover { background-color: @dark-radial-grad; }
+    }
+
+    &:first {
+      border-left-width: 0;
+      border-top-left-radius: 0;
+    }
+
+    &:last { border-top-right-radius: 0; }
+
+    &:only-one { border-left-width: 0; }
+  }
+}
