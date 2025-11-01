@@ -57,36 +57,21 @@ jobs:
           sha256sum "$ZIP" > "${ZIP}.sha256"
           cat "${ZIP}.sha256"
 
-      - name: Create GitHub Release (if tag looks like vX.Y.Z)
-        id: create_release
-        if: startsWith( steps.meta.outputs.tag, 'v' )
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release and Upload Assets (if tag looks like vX.Y.Z)
+        if: startsWith(steps.meta.outputs.tag, 'v')
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.tag }}
           body: "Automated release for ${{ steps.meta.outputs.tag }}"
+          files: |
+            ${{ steps.meta.outputs.zipname }}
+            ${{ steps.meta.outputs.zipname }}.sha256
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload zip asset to release (only if release was created)
-        if: steps.create_release.outputs.upload_url != ''
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.meta.outputs.zipname }}
-          asset_name: ${{ steps.meta.outputs.zipname }}
-          asset_content_type: application/zip
-
-      - name: Upload sha256 asset to release (only if release was created)
-        if: steps.create_release.outputs.upload_url != ''
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.meta.outputs.zipname }}.sha256
-          asset_name: ${{ steps.meta.outputs.zipname }}.sha256
-          asset_content_type: text/plain
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Final log - location of generated files
         run: |
           ls -l
           echo "Artifact(s): ${{ steps.meta.outputs.zipname }} and ${{ steps.meta.outputs.zipname }}.sha256 (if created)"
+          
